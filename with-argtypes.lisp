@@ -1,3 +1,5 @@
+(in-package :com.nklein.util)
+
 (defun proper-list-p (x)
     (if (consp x)
 	(proper-list-p (cdr x))

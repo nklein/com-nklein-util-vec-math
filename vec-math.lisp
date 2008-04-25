@@ -1,3 +1,5 @@
+(in-package :com.nklein.util)
+
 (deftype float-type  ()
     "Our floating-point type of choice"
     'double-float)
@@ -27,7 +29,7 @@
     "Convert a list of numbers into a vector"
     (mapv #'coercef vals))
 
-(defun vs (scale val)
+(defun vs-no-types (scale val)
     "Scale a vector by some scaling factor"
     (declare (optimize (speed 3) (safety 0)))
     (mapv #'(lambda (x) (* x scale)) val))
@@ -39,7 +41,7 @@
     (declare (optimize (speed 3) (safety 0)))
     (mapv (lambda-at ((x . float-type)) (* x scale)) val))
 
-(defun-at vs-into-at ( (scale . float-type) (val . vector-type) )
+(defun-at vs ( (scale . float-type) (val . vector-type) )
     (declare (optimize (speed 3) (safety 0)))
     (let ((ret (make-array (length val) :element-type 'float-type)))
 	(flet-at ((scaler ((x . float-type)) (* x scale)))
