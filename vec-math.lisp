@@ -5,13 +5,6 @@
     "Vectors of our floats"
     '(vector float-type))
 
-(defmacro declf (x)
-    "Declare something as our floating-point type of choice"
-    `(declare (type float-type ,x)))
-(defmacro declv (x)
-    "Declare something as a vector of our floating-point type of choice"
-    `(declare (type vector-type ,x)))
-
 (defmacro thef (&rest what)
     "Declare something as returning our floating-point type of choice"
     `(the float-type ,@what))
@@ -28,14 +21,17 @@
 (declaim (inline mapv))
 (defun mapv (func vecs)
     "Apply a function to a list of vectors to get back a vector"
-    (map 'vector-type func vecs))
+    (map 'vector func vecs))
 
 (defun v (&rest vals)
     "Convert a list of numbers into a vector"
     (mapv #'coercef vals))
 
+;; "Scale a vector by some scaling factor"
 (defun vs (scale val)
-    "Scale a vector by some scaling factor"
-    (declare (type float-type scale)
-	     (type vector-type val))
-    (mapv #'(lambda (x) (declare (type float-type x)) (thef (* x scale))) val))
+    (declare (optimize (speed 3) (safety 0)))
+    (mapv #'(lambda (x) (* x scale)) val))
+(defun-at vs-at ( (scale . float-type) (val . vector-type) )
+    (declare (optimize (speed 3) (safety 0)))
+    (flet-at ((scaler ((x . float-type)) (thef (* x scale))))
+	(mapv #'scaler val)))

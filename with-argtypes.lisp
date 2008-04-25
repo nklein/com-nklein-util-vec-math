@@ -31,8 +31,22 @@
 (defmacro defun-at (name arg-forms &body body)
     (with-argtypes `(defun ,name) arg-forms nil body))
 
+(defun flet-one-func (form)
+    (destructuring-bind (name arg-forms . body) form
+	(with-argtypes `(,name) arg-forms nil body)))
+
+(defmacro flet-at (func-forms &body body)
+    `(flet (,@(mapcar #'flet-one-func func-forms))
+	,@body))
+
+(defmacro labels-at (func-forms &body body)
+    `(labels (,@(mapcar #'flet-one-func func-forms))
+	,@body))
+
 (defmacro lambda-at (arg-forms &body body)
-    (with-argtypes '(lambda) arg-forms nil body))
+    (multiple-value-bind (vars decls)
+	    (prep-typed-vars-and-decls arg-forms)
+	`#'(lambda (,@vars) ,@decls ,@body)))
 
 (defmacro let-at (arg-forms &body body)
     (with-argtypes '(let) arg-forms nil body))
