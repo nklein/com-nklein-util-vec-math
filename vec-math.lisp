@@ -3,7 +3,7 @@
     'double-float)
 (deftype vector-type ()
     "Vectors of our floats"
-    '(vector float-type))
+    'vector)
 
 (defmacro thef (&rest what)
     "Declare something as returning our floating-point type of choice"
@@ -21,17 +21,26 @@
 (declaim (inline mapv))
 (defun mapv (func vecs)
     "Apply a function to a list of vectors to get back a vector"
-    (map 'vector func vecs))
+    (map 'vector-type func vecs))
 
 (defun v (&rest vals)
     "Convert a list of numbers into a vector"
     (mapv #'coercef vals))
 
-;; "Scale a vector by some scaling factor"
 (defun vs (scale val)
+    "Scale a vector by some scaling factor"
     (declare (optimize (speed 3) (safety 0)))
     (mapv #'(lambda (x) (* x scale)) val))
 (defun-at vs-at ( (scale . float-type) (val . vector-type) )
     (declare (optimize (speed 3) (safety 0)))
-    (flet-at ((scaler ((x . float-type)) (thef (* x scale))))
+    (flet-at ((scaler ((x . float-type)) (* x scale)))
 	(mapv #'scaler val)))
+(defun-at vs-lambda-at ( (scale . float-type) (val . vector-type) )
+    (declare (optimize (speed 3) (safety 0)))
+    (mapv (lambda-at ((x . float-type)) (* x scale)) val))
+
+(defun-at vs-into-at ( (scale . float-type) (val . vector-type) )
+    (declare (optimize (speed 3) (safety 0)))
+    (let ((ret (make-array (length val) :element-type 'float-type)))
+	(flet-at ((scaler ((x . float-type)) (* x scale)))
+	    (map-into ret #'scaler val))))
