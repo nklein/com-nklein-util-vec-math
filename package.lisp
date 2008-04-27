@@ -1,5 +1,5 @@
-(defpackage :com.nklein.util
-    (:use :cl)
+(defpackage :com.nklein.util.vec-math
+    (:use :cl :com.nklein.util.general)
     (:export
 	;; from vec-math
 	    :float-type :vector-type
@@ -7,10 +7,4 @@
 	    :mapv
 	    :v
 	    :vs
-	;; from with-argtypes
-	    :with-argtypes
-	    :proper-list-p
-	    :defun-at :flet-at :labels-at :lambda-at
-	    :let-at :let-at*
-	    :do-at :do-at*
 	))

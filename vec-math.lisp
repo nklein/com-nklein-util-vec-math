@@ -1,4 +1,4 @@
-(in-package :com.nklein.util)
+(in-package :com.nklein.util.vec-math)
 
 (deftype float-type  ()
     "Our floating-point type of choice"
