@@ -2,9 +2,15 @@
     (:use :cl :com.nklein.util.general)
     (:export
 	;; from vec-math
-	    :float-type :vector-type
-	    :thef :thev :coercef
-	    :mapv
 	    :v
-	    :vs
+	    :vector-operation
+	    :v+
+	    :v-
+	    :v*
+	    :v/
+	    :v.
+	    :vector-equal
+	    :vnorm
+	    :normalize
+	    :normalize*
 	))

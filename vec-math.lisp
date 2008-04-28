@@ -1,48 +1,57 @@
 (in-package :com.nklein.util.vec-math)
 
-(deftype float-type  ()
-    "Our floating-point type of choice"
-    'double-float)
-(deftype vector-type ()
-    "Vectors of our floats"
-    'vector)
+(defun v (tt &rest vals)
+    "Convert a list of numbers into a vector of a given type"
+    (map 'vector #'(lambda (x) (coerce x tt)) vals))
 
-(defmacro thef (&rest what)
-    "Declare something as returning our floating-point type of choice"
-    `(the float-type ,@what))
+(defmacro vector-operation (op v1 v2 &optional workspace)
+    "Perform some operation on vector V1, returning a vector.  If V2 is a sequence, then the OP is performed elementwise.  If V2 is not a sequence, then it is assumed to be a constant value that can be combined with each element of V1 with the OP.  If WORKSPACE is given, it is used to hold the resulting vector.  Otherwise, a new result is consed."
+    (let ((ret      (gensym))
+	  (operator (gensym)))
+	`(let ((,ret (or ,workspace (make-compatible-array ,v1))))
+	    (if (typep ,v2 'sequence)
+		(flet ((,operator (x y) (,op x y)))
+		    (map-into ,ret #',operator ,v1 ,v2))
+		(flet ((,operator (x) (,op x ,v2)))
+		    (map-into ,ret #',operator ,v1))))))
 
-(defmacro thev (&rest what)
-    "Declare something as returning our vector-type"
-    `(the vector-type ,@what))
-
-(declaim (inline coercef))
-(defun coercef (x)
-    "Force a number to be our floating-point type of choice"
-    (coerce x 'float-type))
-
-(declaim (inline mapv))
-(defun mapv (func vecs)
-    "Apply a function to a list of vectors to get back a vector"
-    (map 'vector-type func vecs))
-
-(defun v (&rest vals)
-    "Convert a list of numbers into a vector"
-    (mapv #'coercef vals))
-
-(defun vs-no-types (scale val)
-    "Scale a vector by some scaling factor"
+(defun v+ (v1 v2 &optional workspace)
+    "Vector addition (or add the same scalar to each component of V1)"
     (declare (optimize (speed 3) (safety 0)))
-    (mapv #'(lambda (x) (* x scale)) val))
-(defun-at vs-at ( (scale . float-type) (val . vector-type) )
-    (declare (optimize (speed 3) (safety 0)))
-    (flet-at ((scaler ((x . float-type)) (* x scale)))
-	(mapv #'scaler val)))
-(defun-at vs-lambda-at ( (scale . float-type) (val . vector-type) )
-    (declare (optimize (speed 3) (safety 0)))
-    (mapv (lambda-at ((x . float-type)) (* x scale)) val))
+    (vector-operation + v1 v2 workspace))
 
-(defun-at vs ( (scale . float-type) (val . vector-type) )
+(defun v- (v1 v2 &optional workspace)
+    "Vector subtraction (or subtract the same scalar from each component of V1)"
     (declare (optimize (speed 3) (safety 0)))
-    (let ((ret (make-array (length val) :element-type 'float-type)))
-	(flet-at ((scaler ((x . float-type)) (* x scale)))
-	    (map-into ret #'scaler val))))
+    (vector-operation - v1 v2 workspace))
+
+(defun v* (v1 v2 &optional workspace)
+    "Elementwise vector multiplication (or scale the vector by the scalar V2)"
+    (declare (optimize (speed 3) (safety 0)))
+    (vector-operation * v1 v2 workspace))
+
+(defun v/ (v1 v2 &optional workspace)
+    "Elementwise vector division (or divide each component by the scalar V2)"
+    (declare (optimize (speed 3) (safety 0)))
+    (vector-operation / v1 v2 workspace))
+
+(defun v. (v1 v2 &optional workspace)
+    "Dot product of two vectors"
+    (reduce #'+ (v* v1 v2 workspace)))
+
+(defun vector-equal ( v1 v2 &optional workspace )
+    (let ((diff (v- v1 v2 workspace)))
+	(zerop (v. diff diff))))
+
+(defun vnorm (vv)
+    "Norm of a vector"
+    (sqrt (v. vv vv)))
+
+(defun normalize (vv &optional workspace)
+    "Normalize a vector, taking care not to divide by zero"
+    (let ((mag (vnorm vv)))
+	(if (zerop mag) vv (v/ vv mag workspace))))
+
+(defun normalize* (vv &optional workspace)
+    "Normalize a vector that we're sure is non-zero"
+    (v/ vv (vnorm vv) workspace))
