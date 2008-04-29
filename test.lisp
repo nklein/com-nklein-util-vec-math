@@ -96,3 +96,10 @@
 	(assert-equal 34s0 (v. v1 v2 vv))
 	(assert-equal 18s0 (v. v1 aa))
 	(assert-equal 18s0 (v. v1 aa vv))))
+
+(define-test random-vector
+    (let ((v1 (random-vector 'single-float 4))
+	  (v2 (random-vector 'single-float 4)))
+	(assert-false (vector-equal v1 v2))	; technically, could fail
+	(assert-equal 4 (length v1))
+	(assert-equal 'single-float (type-of (aref v1 0)))))
