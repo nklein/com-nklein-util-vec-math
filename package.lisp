@@ -13,4 +13,5 @@
 	    :vnorm
 	    :normalize
 	    :normalize*
+	    :random-vector
 	))

@@ -55,3 +55,12 @@
 (defun normalize* (vv &optional workspace)
     "Normalize a vector that we're sure is non-zero"
     (v/ vv (vnorm vv) workspace))
+
+(defun random-vector (tt nn &optional state)
+    (let ((ret (make-array nn :element-type tt)))
+	(do ((ii 0 (+ ii 2)))
+	    ((>= ii nn) ret)
+	    (multiple-value-bind (aa bb) (random-gaussian state)
+		(setf (aref ret ii) (coerce aa tt))
+		(if (< ii (- nn 1))
+		    (setf (aref ret (1+ ii)) (coerce bb tt)))))))
