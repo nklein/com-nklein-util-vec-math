@@ -50,7 +50,7 @@
 (defun normalize (vv &optional workspace)
     "Normalize a vector, taking care not to divide by zero"
     (let ((mag (vnorm vv)))
-	(if (zerop mag) vv (v/ vv mag workspace))))
+	(if (< mag 0.00001) vv (v/ vv mag workspace))))
 
 (defun normalize* (vv &optional workspace)
     "Normalize a vector that we're sure is non-zero"
